@@ -4,7 +4,7 @@
     {
       "label": "Refine Prompt",
       "type": "shell",
-      "command": "bun refine.js \"${selectedText}\"",
+      "command": "pbpaste | bun refine.js",
       "presentation": {
         "reveal": "always",
         "panel": "new"
