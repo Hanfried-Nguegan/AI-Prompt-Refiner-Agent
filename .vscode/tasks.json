@@ -4,11 +4,13 @@
     {
       "label": "Refine Prompt",
       "type": "shell",
-      "command": "pbpaste | bun refine.js",
+      "command": "pbpaste | REFINER_DAEMON=1 bun run cli",
       "presentation": {
+        "echo": true,
         "reveal": "always",
-        "panel": "new"
-      }
+        "panel": "shared"
+      },
+      "problemMatcher": []
     }
   ]
 }
