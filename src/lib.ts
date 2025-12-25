@@ -39,7 +39,8 @@ function findFirstNonEmptyString(obj: unknown): string | null {
 
 export async function refinePrompt(prompt: string, options?: { url?: string; timeoutMs?: number }) {
   const url = options?.url ?? process.env.REFINER_WEBHOOK_URL ?? "http://localhost:5678/webhook/refine-prompt";
-  const timeoutMs = options?.timeoutMs ?? 6000;
+  // Increase default timeout to handle slower LLM responses while still being reasonable
+  const timeoutMs = options?.timeoutMs ?? Number(process.env.REFINER_TIMEOUT_MS ?? 15000);
 
   const agent = new http.Agent({ keepAlive: true });
 
