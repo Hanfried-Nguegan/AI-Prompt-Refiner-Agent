@@ -11,6 +11,8 @@
   "scripts": {
     "build": "tsc",
     "start": "bun dist/refine.js",
-    "dev": "bun src/refine.ts"
+    "dev": "bun src/refine.ts",
+    "daemon": "bun src/daemon.ts",
+    "cli": "bun src/refine.ts"
   }
 }
