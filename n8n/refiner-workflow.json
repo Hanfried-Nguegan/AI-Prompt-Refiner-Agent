@@ -1,0 +1,67 @@
+{
+  "name": "Prompt Refiner - API Key Rotation",
+  "nodes": [
+    {
+      "parameters": {
+        "functionCode": "const keys = (process.env.OPENAI_KEYS || '').split(',').map(k=>k.trim()).filter(Boolean);\nif(!keys.length) throw new Error('No OPENAI_KEYS');\nconst meta = this.getWorkflowStaticData('global');\nmeta.rotateIndex = (meta.rotateIndex || 0) % keys.length;\nconst key = keys[meta.rotateIndex];\nmeta.rotateIndex = (meta.rotateIndex + 1) % keys.length;\nreturn [{ json: { OPENAI_KEY: key } }];"
+      },
+      "name": "RotateKey",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "={{$json[\"webhookUrl\"] || 'https://api.openai.com/v1/chat/completions'}}",
+        "options": {},
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer {{$json.OPENAI_KEY}}"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "bodyParametersJson": "={ \"model\": \"gpt-4o-mini\", \"messages\": [{\"role\": \"user\", \"content\": $json.prompt }], \"max_tokens\": 200 }"
+      },
+      "name": "CallModel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {},
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [650, 300]
+    }
+  ],
+  "connections": {
+    "RotateKey": {
+      "main": [
+        [
+          {
+            "node": "CallModel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CallModel": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
