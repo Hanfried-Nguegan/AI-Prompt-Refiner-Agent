@@ -1,5 +1,15 @@
 {
+  "type": "module",
   "dependencies": {
     "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "@types/node": "^20.5.1"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "bun src/refine.ts",
+    "lint": "echo 'no linter configured'"
   }
 }
