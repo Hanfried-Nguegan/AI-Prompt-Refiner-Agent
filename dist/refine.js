@@ -31,7 +31,7 @@ async function run() {
             });
         }
         else {
-            refined = await refinePrompt(prompt, { timeoutMs: Number(process.env.REFINER_TIMEOUT_MS ?? 6000) });
+            refined = await refinePrompt(prompt, { timeoutMs: Number(process.env.REFINER_TIMEOUT_MS ?? 15000) });
         }
         console.log("\n✨ Refined Prompt (copied to clipboard):\n");
         console.log(refined);
@@ -45,6 +45,5 @@ async function run() {
         process.exit(1);
     }
 }
-await run();
 await run();
 //# sourceMappingURL=refine.js.map
