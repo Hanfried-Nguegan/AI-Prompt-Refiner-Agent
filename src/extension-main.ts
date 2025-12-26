@@ -31,8 +31,8 @@ async function refineSelection() {
     // Copy to clipboard
     await vscode.env.clipboard.writeText(selectedText);
 
-    // Wait a moment for clipboard to settle
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Wait for clipboard to settle
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Run the task
     const tasks = await vscode.tasks.fetchTasks();
@@ -45,43 +45,40 @@ async function refineSelection() {
 
     const execution = await vscode.tasks.executeTask(refineTask);
 
-    // Wait for task to complete
-    await new Promise<void>((resolve) => {
-      const disposable = vscode.tasks.onDidEndTask((e) => {
-        if (e.execution.task === refineTask) {
-          disposable.dispose();
-          resolve();
-        }
-      });
-    });
+    // Wait for task to complete with timeout (30 seconds max)
+    const taskCompleted = await Promise.race([
+      new Promise<boolean>((resolve) => {
+        const disposable = vscode.tasks.onDidEndTask((e) => {
+          if (e.execution.task === refineTask) {
+            disposable.dispose();
+            resolve(true);
+          }
+        });
+      }),
+      new Promise<boolean>((resolve) => {
+        setTimeout(() => resolve(false), 30000); // 30 second timeout
+      })
+    ]);
+
+    if (!taskCompleted) {
+      vscode.window.showErrorMessage("❌ Refinement timed out (30s)");
+      return;
+    }
+
+    // Wait longer for clipboard to be updated
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Read refined text from clipboard
     const refined = await vscode.env.clipboard.readText();
 
     if (refined && refined !== selectedText) {
-      // Copy refined text back to clipboard
-      await vscode.env.clipboard.writeText(refined);
-
-      // Check if Copilot Chat is visible
-      const chatVisible = await vscode.commands.executeCommand(
-        "copilot.chat.isVisible"
-      );
-
-      if (chatVisible) {
-        // Focus Copilot Chat and simulate paste
-        await vscode.commands.executeCommand("copilot.chat.focus");
-        await new Promise(resolve => setTimeout(resolve, 200));
-        await vscode.commands.executeCommand("editor.action.clipboardPasteAction");
-        vscode.window.showInformationMessage(
-          "✨ Refined prompt pasted in Copilot Chat!"
-        );
-      } else {
-        // Replace selected text in editor
-        await editor.edit((editBuilder) => {
-          editBuilder.replace(editor.selection, refined);
-        });
-        vscode.window.showInformationMessage("✨ Prompt refined in editor!");
-      }
+      // Replace selected text with refined version
+      await editor.edit((editBuilder) => {
+        editBuilder.replace(editor.selection, refined);
+      });
+      vscode.window.showInformationMessage("✨ Prompt refined!");
+    } else {
+      vscode.window.showErrorMessage("❌ No refined result returned");
     }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
