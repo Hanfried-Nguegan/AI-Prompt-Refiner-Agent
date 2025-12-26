@@ -46,14 +46,18 @@ async function refineSelection() {
     }
   }
 
-  if (!editor) {
-    vscode.window.showErrorMessage("No text editor with selection found");
-    return;
+  let selectedText: string;
+
+  // Try to get selection from editor
+  if (editor && !editor.selection.isEmpty) {
+    selectedText = editor.document.getText(editor.selection).trim();
+  } else {
+    // Fallback: read from clipboard if no selection found
+    selectedText = (await vscode.env.clipboard.readText()).trim();
   }
 
-  const selectedText = editor.document.getText(editor.selection).trim();
   if (!selectedText) {
-    vscode.window.showErrorMessage("No text selected");
+    vscode.window.showErrorMessage("No text selected or found in clipboard");
     return;
   }
 
@@ -91,10 +95,16 @@ async function refineSelection() {
     const refined = await vscode.env.clipboard.readText();
 
     if (refined && refined !== selectedText) {
-      editor.edit(editBuilder => {
-        editBuilder.replace(editor.selection, refined);
-      });
-      vscode.window.showInformationMessage("✨ Done!");
+      // If we have an editor, replace the selection
+      if (editor && !editor.selection.isEmpty) {
+        editor.edit(editBuilder => {
+          editBuilder.replace(editor.selection, refined);
+        });
+        vscode.window.showInformationMessage("✨ Done!");
+      } else {
+        // Just show the refined text in a message
+        vscode.window.showInformationMessage(`✨ Refined (copied to clipboard):\n${refined.slice(0, 100)}...`);
+      }
     } else {
       vscode.window.showErrorMessage("No refined result");
     }
