@@ -34,7 +34,7 @@ async function run() {
         client.on("error", (err) => reject(err));
       });
     } else {
-      refined = await refinePrompt(prompt, { timeoutMs: Number(process.env.REFINER_TIMEOUT_MS ?? 6000) });
+      refined = await refinePrompt(prompt, { timeoutMs: Number(process.env.REFINER_TIMEOUT_MS ?? 15000) });
     }
 
     console.log("\n✨ Refined Prompt (copied to clipboard):\n");
@@ -50,5 +50,4 @@ async function run() {
   }
 }
 
-await run();
 await run();
