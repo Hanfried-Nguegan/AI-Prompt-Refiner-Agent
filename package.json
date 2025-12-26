@@ -8,7 +8,7 @@
     "vscode": "^1.75.0"
   },
   "type": "module",
-  "main": "dist/extension.js",
+  "main": "dist/index.js",
   "activationEvents": [
     "onStartupFinished"
   ],
