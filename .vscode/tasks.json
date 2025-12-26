@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Refine Prompt",
+      "label": "Refine Clipboard",
       "type": "shell",
       "command": "pbpaste | REFINER_DAEMON=1 bun run cli",
       "presentation": {

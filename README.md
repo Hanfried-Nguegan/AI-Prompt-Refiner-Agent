@@ -64,6 +64,13 @@ echo "write me a prompt about typescript" | bun run cli
 - Press Cmd+Shift+P and type "Refine Selection"
 - The selected text gets replaced with the refined version
 
+**Loading the extension:**
+1. In VS Code, open Extensions (Cmd+Shift+X)
+2. Click the three-dot menu, select "Install from VSIX"
+3. Navigate to `prompt-refiner-1.0.0.vsix` in this repo and select it
+4. Reload VS Code (the extension activates automatically)
+5. Select text in any file, then run "Refine Selection" from the command palette
+
 **Terminal (Daemon)**
 ```bash
 # Terminal 1: Start the daemon
