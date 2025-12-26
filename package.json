@@ -2,7 +2,7 @@
   "name": "prompt-refiner",
   "displayName": "Prompt Refiner",
   "version": "1.0.0",
-  "publisher": "YOUR_PUBLISHER_ID",
+  "publisher": "Hanfried",
   "description": "Refine your prompts instantly with AI using n8n workflows",
   "engines": {
     "vscode": "^1.75.0"
@@ -10,7 +10,7 @@
   "type": "module",
   "main": "dist/extension.js",
   "activationEvents": [
-    "onCommand:promptRefiner.refineSelection"
+    "onStartupFinished"
   ],
   "contributes": {
     "commands": [
