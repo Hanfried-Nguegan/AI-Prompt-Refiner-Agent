@@ -1,10 +1,24 @@
 import * as vscode from "vscode";
 
 let activated = false;
+let lastEditorWithSelection: vscode.TextEditor | null = null;
 
 export function activate(context: vscode.ExtensionContext) {
   if (activated) return;
   activated = true;
+
+  // Track when editors have selections
+  vscode.window.onDidChangeActiveTextEditor(editor => {
+    if (editor && editor.selection && !editor.selection.isEmpty) {
+      lastEditorWithSelection = editor;
+    }
+  });
+
+  vscode.window.onDidChangeTextEditorSelection(e => {
+    if (e.textEditor && !e.selections[0].isEmpty) {
+      lastEditorWithSelection = e.textEditor;
+    }
+  });
 
   const command = vscode.commands.registerCommand(
     "promptRefiner.refineSelection",
@@ -16,19 +30,24 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 async function refineSelection() {
-  // Try active editor first, then search all open editors
-  let editor = vscode.window.activeTextEditor;
+  // Try: active editor → last editor with selection → any visible editor
+  let editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
   
-  if (!editor || !editor.document) {
-    // Search through all open text editors
-    const visibleEditors = vscode.window.visibleTextEditors;
+  if (!editor || editor.selection.isEmpty) {
+    editor = lastEditorWithSelection || undefined;
+  }
+  
+  if (!editor || editor.selection.isEmpty) {
+    const visibleEditors = vscode.window.visibleTextEditors.filter(
+      e => e.document.languageId !== "chat"
+    );
     if (visibleEditors.length > 0) {
       editor = visibleEditors[0];
     }
   }
 
   if (!editor) {
-    vscode.window.showErrorMessage("No text editor found");
+    vscode.window.showErrorMessage("No text editor with selection found");
     return;
   }
 
