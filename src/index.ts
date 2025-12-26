@@ -16,9 +16,19 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 async function refineSelection() {
-  const editor = vscode.window.activeTextEditor;
+  // Try active editor first, then search all open editors
+  let editor = vscode.window.activeTextEditor;
+  
+  if (!editor || !editor.document) {
+    // Search through all open text editors
+    const visibleEditors = vscode.window.visibleTextEditors;
+    if (visibleEditors.length > 0) {
+      editor = visibleEditors[0];
+    }
+  }
+
   if (!editor) {
-    vscode.window.showErrorMessage("No active editor");
+    vscode.window.showErrorMessage("No text editor found");
     return;
   }
 
