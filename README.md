@@ -14,21 +14,44 @@ Prompt Refiner gives you three seamless ways to refine your prompts:
 
 All three mechanisms use the same underlying engine: a strict TypeScript core that sends your prompt to your n8n workflow, handles retries intelligently when rate-limited, and returns the refined result.
 
+## Prerequisites
+
+You'll need:
+- **Bun** (JavaScript runtime) — [Install here](https://bun.sh)
+- **n8n** instance (free cloud or self-hosted) — [Create account](https://n8n.cloud)
+- **OpenAI API key** (or another LLM provider configured in n8n)
+
 ## Quick Start
 
-### 1. Install & Configure
+### 1. Install Dependencies
 
 ```bash
 bun install
+bun run build
+```
+
+### 2. Set Up n8n Workflow
+
+You don't need to build the workflow from scratch — it's included in the repo.
+
+**In n8n:**
+- Go to Workflows → New → Import from file
+- Upload `n8n/refiner-workflow.json` from this repo
+- The workflow opens with nodes pre-configured:
+  - **RotateKey** — Cycles through your OpenAI API keys (set `OPENAI_KEYS` env variable in n8n)
+  - **CallModel** — Calls OpenAI's gpt-4o-mini to refine your prompt
+  - **Respond** — Sends the refined result back to Prompt Refiner
+
+**Webhook setup:**
+- In the "Respond" node, copy the webhook URL
+- Create `.env` in this repo:
+```bash
 cp .env.example .env
+# Add your webhook URL
+REFINER_WEBHOOK_URL=https://your-n8n-instance.com/webhook/your-webhook-id
 ```
 
-Edit `.env` with your n8n webhook URL:
-```
-REFINER_WEBHOOK_URL=https://your-n8n-instance.com/webhook/your-endpoint
-```
-
-### 2. Choose Your Method
+### 3. Choose Your Method
 
 **Terminal (CLI)**
 ```bash
@@ -123,6 +146,17 @@ src/
 **Strict TypeScript throughout.** Compilation is tight, with full type coverage and zero `any` types.
 
 Built with dependency injection — each component gets what it needs, making it easy to test and extend.
+
+### How n8n Workflow Works
+
+The included workflow (`n8n/refiner-workflow.json`) does this:
+
+1. **Receive webhook call** — Prompt Refiner sends your prompt here
+2. **Rotate API key** — Cycles through your OpenAI keys to avoid rate limits
+3. **Call OpenAI** — Sends prompt to gpt-4o-mini (you can change the model)
+4. **Return result** — Sends refined prompt back to Prompt Refiner
+
+The workflow is stateless — each refinement is independent. Rate limiting is handled by Prompt Refiner's retry logic (exponential backoff).
 
 ## Development
 
