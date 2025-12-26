@@ -60,16 +60,10 @@ echo "write me a prompt about typescript" | bun run cli
 ```
 
 **VS Code (Extension)**
-- Open any file, select some text
-- Press Cmd+Shift+P and type "Refine Selection"
-- The selected text gets replaced with the refined version
-
-**Loading the extension:**
-1. In VS Code, open Extensions (Cmd+Shift+X)
-2. Click the three-dot menu, select "Install from VSIX"
-3. Navigate to `prompt-refiner-1.0.0.vsix` in this repo and select it
-4. Reload VS Code (the extension activates automatically)
-5. Select text in any file, then run "Refine Selection" from the command palette
+- Open Extensions in VS Code (Cmd+Shift+X)
+- Search for "Prompt Refiner"
+- Click Install
+- Select text in any file, then run "Refine Selection" from the command palette (Cmd+Shift+P)
 
 **Terminal (Daemon)**
 ```bash
@@ -181,12 +175,42 @@ bun test
 
 ## Packaging
 
-The VS Code extension is pre-packaged as `prompt-refiner-1.0.0.vsix`. You can load it directly into VS Code or modify the extension and rebuild:
+The VS Code extension is ready for publishing to the marketplace. To make it publicly available:
 
+**1. Create publisher account**
+- Go to [VS Code Marketplace](https://marketplace.visualstudio.com/manage)
+- Sign in with your Microsoft account (or create one)
+- Create a new publisher (organization ID)
+
+**2. Update publisher ID**
+- Edit `package.json` and replace `YOUR_PUBLISHER_ID` with your publisher ID
+- Example: If your publisher ID is "hanfried", set `"publisher": "hanfried"`
+
+**3. Create personal access token**
+- Go to your [Azure DevOps organization](https://dev.azure.com)
+- Generate a Personal Access Token with "Marketplace (publish)" scope
+
+**4. Publish**
 ```bash
-# The extension is already compiled in dist/extension.js
-# Package it with vsce if you make changes
-vsce package
+# Install vsce (already in devDependencies)
+bun install
+
+# Login with your PAT
+vsce login YOUR_PUBLISHER_ID
+
+# Publish the extension
+bun run publish
+```
+
+Once published, users can install it directly from VS Code:
+- Extensions (Cmd+Shift+X)
+- Search for "Prompt Refiner"
+- Click Install
+
+Alternatively, you can package locally:
+```bash
+bun run package
+# Creates prompt-refiner-1.0.0.vsix
 ```
 
 ## Git & Security
