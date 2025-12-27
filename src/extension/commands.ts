@@ -1,6 +1,6 @@
 /**
  * VS Code extension commands
- * 
+ *
  * This module provides self-contained prompt refinement that works in any workspace.
  * It calls the refiner service directly - no workspace task dependency required.
  */
@@ -55,7 +55,7 @@ export function createRefineSelectionCommand(vscodeApi: typeof vscode, state: Ex
       const refined = await ui.withSpinner(vscodeApi, '🔄 Refining...', async () => {
         // Check if daemon mode is preferred
         const cliConfig = loadCliConfig();
-        
+
         return refinePrompt(selectedText, {
           useDaemon: cliConfig.useDaemon,
           socketPath: cliConfig.socketPath,
