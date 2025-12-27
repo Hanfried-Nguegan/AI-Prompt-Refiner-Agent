@@ -57,6 +57,13 @@ export function createRefineSelectionCommand(vscodeApi: typeof vscode, state: Ex
         // Check if daemon mode is preferred
         const cliConfig = loadCliConfig();
 
+        console.debug(
+          '[refineSelection] useDaemon=',
+          cliConfig.useDaemon,
+          'REFINE_TIMEOUT_MS=',
+          REFINE_TIMEOUT_MS
+        );
+
         return refinePrompt(selectedText, {
           useDaemon: cliConfig.useDaemon,
           socketPath: cliConfig.socketPath,
