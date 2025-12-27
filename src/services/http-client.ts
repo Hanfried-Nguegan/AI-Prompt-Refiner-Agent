@@ -12,8 +12,11 @@ import {
   sleep,
 } from '../utils/index.js';
 
-// Reusable HTTP agent with keep-alive for connection pooling
-const httpAgent = new http.Agent({ keepAlive: true });
+// Reusable HTTP agent with keep-alive for connection pooling and explicit timeout
+const httpAgent = new http.Agent({
+  keepAlive: true,
+  timeout: 3600000, // 1 hour to avoid agent timeout interfering
+});
 
 export interface HttpClientOptions {
   timeoutMs: number;
