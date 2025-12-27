@@ -40,7 +40,7 @@ async function httpPost(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
       agent: () => httpAgent,
-      signal: controller.signal as any,
+      signal: controller.signal,
     });
 
     const textBody = await response.text();
