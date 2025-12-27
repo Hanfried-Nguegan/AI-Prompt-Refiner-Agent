@@ -2,6 +2,11 @@ module.exports = [
   {
     ignores: ['dist/**', 'node_modules/**'],
   },
+  // Base ESLint recommended rules (flat config compatible)
+  require('eslint/conf/eslint-recommended'),
+  // TypeScript ESLint recommended config (plugin exposes config object)
+  require('@typescript-eslint/eslint-plugin').configs.recommended,
+  // Project-specific overrides
   {
     files: ['**/*.{ts,tsx,js,jsx}'],
     languageOptions: {
@@ -16,12 +21,8 @@ module.exports = [
     plugins: {
       '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
     },
-    extends: [
-      'eslint:recommended',
-      'plugin:@typescript-eslint/recommended',
-    ],
     rules: {
-      '@typescript-eslint/no-explicit-any': 'warn'
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
 ];
