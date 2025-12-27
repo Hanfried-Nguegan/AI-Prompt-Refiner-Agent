@@ -26,12 +26,19 @@ You'll need:
 
 ## Quick Start
 
-### 1. Install Dependencies
+### 1. One-Line Install (Recommended)
 
 ```bash
-bun install
-bun run build
+git clone https://github.com/Hanfried-Nguegan/AI-Prompt-Refiner-Agent.git
+cd AI-Prompt-Refiner-Agent
+./install.sh
 ```
+
+This will:
+- Install dependencies
+- Build the project
+- Link the CLI globally (`prompt-refiner` command)
+- Optionally start the daemon
 
 ### 2. Set Up n8n Workflow
 
@@ -56,35 +63,46 @@ cp .env.example .env
 REFINER_WEBHOOK_URL=https://your-n8n-instance.com/webhook/your-webhook-id
 ```
 
-### 3. Choose Your Method
+### 3. Use It Anywhere
+
+After installation, the `prompt-refiner` command works from any directory:
 
 **Terminal (CLI):**
 
 ```bash
-echo "write me a prompt about typescript" | bun run cli
+echo "write me a prompt about typescript" | prompt-refiner
 # Result copied to clipboard automatically
 ```
 
 **VS Code (Extension):**
 
-The extension is ready to install. Download the VSIX from this repo:
+The extension works in **any VS Code workspace** after installation — no per-project configuration needed.
 
-1. Clone this repo (or just download `prompt-refiner-1.0.0.vsix`)
-2. In VS Code, open Extensions (Cmd+Shift+X)
-3. Click the three-dot menu, select "Install from VSIX"
-4. Select `prompt-refiner-1.0.0.vsix` from the repo folder
-5. Reload VS Code
-6. Select text in any file, then Cmd+Shift+P → "Refine Selection"
+1. In VS Code, open Extensions (Cmd+Shift+X)
+2. Click the three-dot menu, select "Install from VSIX"
+3. Select `prompt-refiner-1.1.0.vsix` from the repo folder
+4. Reload VS Code
+5. Select text in any file, then Cmd+Shift+P → "Refine Selection"
 
-**Terminal (Daemon):**
+**Terminal (Daemon) — Recommended for speed:**
 
 ```bash
-# Terminal 1: Start the daemon
-bun run daemon
+# Terminal 1: Start the daemon (runs in background)
+prompt-refiner-daemon
 
-# Terminal 2: Use it with caching
-REFINER_DAEMON=1 bun run cli
+# Terminal 2: Use it with caching — works from any directory
+REFINER_DAEMON=1 echo "your prompt" | prompt-refiner
 # Repeating the same prompt = instant (cached) response
+```
+
+### Alternative: Manual Install
+
+If you prefer manual setup:
+
+```bash
+bun install
+bun run build
+bun link  # Makes prompt-refiner available globally
 ```
 
 ## How It Works

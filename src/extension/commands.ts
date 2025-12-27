@@ -1,14 +1,16 @@
 /**
  * VS Code extension commands
+ * 
+ * This module provides self-contained prompt refinement that works in any workspace.
+ * It calls the refiner service directly - no workspace task dependency required.
  */
 
 import type * as vscode from 'vscode';
 import * as ui from './ui.js';
-import { runTaskByName } from './tasks.js';
+import { refinePrompt } from '../services/refiner.js';
+import { loadCliConfig } from '../config/index.js';
 
-const TASK_NAME = 'Refine Clipboard';
-const TASK_TIMEOUT_MS = 30000;
-const CLIPBOARD_DELAY_MS = 500;
+const REFINE_TIMEOUT_MS = 30000;
 
 interface ExtensionState {
   lastEditorWithSelection: vscode.TextEditor | null;
@@ -16,6 +18,7 @@ interface ExtensionState {
 
 /**
  * Create the refine selection command handler
+ * Works in any VS Code workspace - no task configuration needed
  */
 export function createRefineSelectionCommand(vscodeApi: typeof vscode, state: ExtensionState) {
   return async function refineSelection(): Promise<void> {
@@ -48,30 +51,25 @@ export function createRefineSelectionCommand(vscodeApi: typeof vscode, state: Ex
     }
 
     try {
-      // Copy to clipboard for the task
-      await ui.writeClipboard(vscodeApi, selectedText);
-      await sleep(CLIPBOARD_DELAY_MS);
-
-      // Run the refine task with spinner
-      const result = await ui.withSpinner(vscodeApi, '🔄 Refining...', async () => {
-        return runTaskByName(vscodeApi, TASK_NAME, TASK_TIMEOUT_MS);
+      // Refine directly using the service (no task dependency)
+      const refined = await ui.withSpinner(vscodeApi, '🔄 Refining...', async () => {
+        // Check if daemon mode is preferred
+        const cliConfig = loadCliConfig();
+        
+        return refinePrompt(selectedText, {
+          useDaemon: cliConfig.useDaemon,
+          socketPath: cliConfig.socketPath,
+          timeoutMs: REFINE_TIMEOUT_MS,
+        });
       });
 
-      if (!result.success) {
-        ui.showError(vscodeApi, result.error ?? 'Task failed');
-        return;
-      }
-
-      // Wait for clipboard to be updated
-      await sleep(CLIPBOARD_DELAY_MS);
-
-      // Get refined text from clipboard
-      const refined = await ui.readClipboard(vscodeApi);
-
-      if (!refined || refined === selectedText) {
+      if (!refined) {
         ui.showError(vscodeApi, 'No refined result');
         return;
       }
+
+      // Copy to clipboard
+      await ui.writeClipboard(vscodeApi, refined);
 
       // Replace in editor if we have one
       if (editor && !editor.selection.isEmpty) {
@@ -90,11 +88,4 @@ export function createRefineSelectionCommand(vscodeApi: typeof vscode, state: Ex
       ui.showError(vscodeApi, `Error: ${message}`);
     }
   };
-}
-
-/**
- * Simple sleep utility
- */
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

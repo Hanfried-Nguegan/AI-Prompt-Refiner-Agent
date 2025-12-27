@@ -34,3 +34,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WebSocket support for real-time streaming
 - Browser extension
 - Integration with more AI providers
+- 🤫 SSHHHHH

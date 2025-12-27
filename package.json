@@ -1,15 +1,20 @@
 {
   "name": "prompt-refiner",
   "displayName": "Prompt Refiner",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "publisher": "Hanfried",
   "description": "Refine your prompts instantly with AI using n8n workflows",
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.75.0",
+    "node": ">=18.0.0"
   },
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/lib.d.ts",
+  "bin": {
+    "prompt-refiner": "./bin/prompt-refiner.js",
+    "prompt-refiner-daemon": "./bin/prompt-refiner-daemon.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/lib.d.ts",
@@ -34,6 +39,7 @@
   },
   "files": [
     "dist",
+    "bin",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
