@@ -29,6 +29,7 @@ async function httpPost(
   options: HttpClientOptions
 ): Promise<{ status: number; body: string }> {
   const controller = new AbortController();
+  const startTime = Date.now();
 
   // If an external signal was provided, forward its abort to our controller
   if (options.signal) {
@@ -48,6 +49,7 @@ async function httpPost(
     // Dynamic import for node-fetch (ESM compatibility)
     const { default: fetch } = await import('node-fetch');
 
+    const fetchStartTime = Date.now();
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -58,7 +60,19 @@ async function httpPost(
       signal: controller.signal,
     });
 
+    const fetchDuration = Date.now() - fetchStartTime;
+    console.debug(
+      `[httpPost] Response received after ${fetchDuration}ms, status=${response.status}`
+    );
+
+    const textStartTime = Date.now();
     const textBody = await response.text();
+    const textDuration = Date.now() - textStartTime;
+
+    const totalDuration = Date.now() - startTime;
+    console.debug(
+      `[httpPost] Body read in ${textDuration}ms. Total: ${totalDuration}ms, body length: ${textBody.length}`
+    );
 
     return {
       status: response.status,
@@ -136,12 +150,15 @@ function extractRefinedPrompt(responseBody: string): string {
  */
 export async function sendToWebhook(prompt: string, config: RefinerConfig): Promise<string> {
   const { webhookUrl, timeoutMs, maxRetries, baseDelayMs } = config;
+  const startTime = Date.now();
 
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       const response = await httpPost(webhookUrl, { prompt }, { timeoutMs });
+      const elapsedMs = Date.now() - startTime;
+      console.debug(`[sendToWebhook] Completed in ${elapsedMs}ms`);
 
       // Handle rate limiting with backoff
       if (isRateLimited(response.status, response.body)) {
@@ -167,10 +184,14 @@ export async function sendToWebhook(prompt: string, config: RefinerConfig): Prom
       // Extract and return refined prompt
       return extractRefinedPrompt(response.body);
     } catch (error) {
+      const elapsedMs = Date.now() - startTime;
       lastError = error;
 
       // Don't retry abort errors
       if (isAbortError(error)) {
+        console.error(
+          `[sendToWebhook] Request timed out after ${elapsedMs}ms (timeoutMs=${timeoutMs})`
+        );
         throw new RefinerError('Request timed out', RefineErrorCode.TIMEOUT, error as Error);
       }
 
