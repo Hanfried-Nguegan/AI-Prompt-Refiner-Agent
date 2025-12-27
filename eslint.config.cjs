@@ -17,34 +17,8 @@ module.exports = tseslint.config(
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'no-console': 'off',
     },
   },
 );
-module.exports = [
-  {
-    files: ["**/*.ts", "**/*.js"],
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: "module",
-      parser: "@typescript-eslint/parser",
-      parserOptions: {
-        project: "./tsconfig.json",
-        sourceType: "module",
-      },
-    },
-    plugins: {
-      "@typescript-eslint": require("@typescript-eslint/eslint-plugin"),
-    },
-    extends: [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "prettier",
-    ],
-    rules: {
-      // Project defaults; override per-file where necessary
-      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
-      "@typescript-eslint/no-explicit-any": "warn",
-      "no-console": "off"
-    },
-  },
-];
