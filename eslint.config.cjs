@@ -1,31 +1,25 @@
-module.exports = [
+const eslint = require('@eslint/js');
+const tseslint = require('typescript-eslint');
+
+module.exports = tseslint.config(
   {
     ignores: ['dist/**', 'node_modules/**'],
   },
-  // Base ESLint recommended rules (flat config compatible)
-  require('eslint/conf/eslint-recommended'),
-  // TypeScript ESLint recommended config (plugin exposes config object)
-  require('@typescript-eslint/eslint-plugin').configs.recommended,
-  // Project-specific overrides
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
   {
-    files: ['**/*.{ts,tsx,js,jsx}'],
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
-      parser: require.resolve('@typescript-eslint/parser'),
       parserOptions: {
         project: './tsconfig.json',
         tsconfigRootDir: __dirname,
-        ecmaVersion: 2022,
-        sourceType: 'module',
       },
-    },
-    plugins: {
-      '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
-];
+);
 module.exports = [
   {
     files: ["**/*.ts", "**/*.js"],
