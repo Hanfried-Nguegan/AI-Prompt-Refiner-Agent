@@ -48,7 +48,6 @@ function getClipboardCommand(): { cmd: string; args: string[] } | null {
     case 'darwin':
       return { cmd: 'pbcopy', args: [] };
     case 'linux':
-      // Try xclip first, fall back to xsel
       return { cmd: 'xclip', args: ['-selection', 'clipboard'] };
     case 'win32':
       return { cmd: 'clip', args: [] };
@@ -122,9 +121,8 @@ export async function copyToClipboard(text: string): Promise<void> {
 /**
  * Print success message with refined prompt
  */
-export function printSuccess(refined: string): void {
-  console.log('\n✨ Refined Prompt (copied to clipboard):\n');
-  console.log(refined);
+export function printSuccess(_: string): void {
+  console.log('\n✨ Refined prompt copied to clipboard.');
 }
 
 /**

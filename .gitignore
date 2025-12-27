@@ -29,7 +29,6 @@ coverage/
 # Compiled files
 *.js
 !eslint.config.js
-!bin/*.js
 *.d.ts
 *.d.ts.map
 *.js.map

@@ -76,11 +76,10 @@ export function createRefineSelectionCommand(vscodeApi: typeof vscode, state: Ex
         await ui.replaceInEditor(editor, editor.selection, refined);
         ui.showInfo(vscodeApi, '✨ Done!');
       } else {
-        // Just show success message for clipboard mode
-        const truncated = refined.length > 80 ? `${refined.slice(0, 80)}...` : refined;
+        // Just show success message for clipboard mode without revealing content
         const msg = isInChat
-          ? `✨ Refined (copied to clipboard). Paste it in Chat: ${truncated}`
-          : `✨ Refined (copied to clipboard): ${truncated}`;
+          ? '✨ Refined and copied to clipboard. Paste it in Chat.'
+          : '✨ Refined and copied to clipboard.';
         ui.showInfo(vscodeApi, msg);
       }
     } catch (error) {
