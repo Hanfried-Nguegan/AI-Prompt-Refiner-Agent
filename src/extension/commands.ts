@@ -10,8 +10,8 @@ import * as ui from './ui.js';
 import { refinePrompt } from '../services/refiner.js';
 import { loadCliConfig } from '../config/index.js';
 
-// Match default refiner timeout (60s)
-const REFINE_TIMEOUT_MS = 60000;
+// Match default refiner timeout (180s)
+const REFINE_TIMEOUT_MS = 180000;
 
 interface ExtensionState {
   lastEditorWithSelection: vscode.TextEditor | null;
