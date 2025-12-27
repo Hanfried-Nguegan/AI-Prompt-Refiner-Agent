@@ -86,9 +86,31 @@ export async function writeClipboard(vscodeApi: typeof vscode, text: string): Pr
 }
 
 /**
- * Show progress notification
+ * Show progress notification with spinner
  */
 export async function withProgress<T>(
+  vscodeApi: typeof vscode,
+  title: string,
+  task: (progress: vscode.Progress<{ message?: string; increment?: number }>) => Promise<T>
+): Promise<T> {
+  return vscodeApi.window.withProgress(
+    {
+      location: vscodeApi.ProgressLocation.Notification,
+      title,
+      cancellable: false,
+    },
+    async (progress) => {
+      // Start with indeterminate spinner
+      progress.report({ increment: 0 });
+      return task(progress);
+    }
+  );
+}
+
+/**
+ * Show progress notification with animated spinner
+ */
+export async function withSpinner<T>(
   vscodeApi: typeof vscode,
   title: string,
   task: () => Promise<T>
@@ -97,8 +119,30 @@ export async function withProgress<T>(
     {
       location: vscodeApi.ProgressLocation.Notification,
       title,
+      cancellable: false,
     },
-    task
+    async (progress) => {
+      const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+      let frameIndex = 0;
+      let isRunning = true;
+
+      // Animate the spinner in the message
+      const animateSpinner = () => {
+        if (!isRunning) return;
+        const frame = frames[frameIndex]!;
+        progress.report({ message: frame });
+        frameIndex = (frameIndex + 1) % frames.length;
+        setTimeout(animateSpinner, 80);
+      };
+
+      animateSpinner();
+
+      try {
+        return await task();
+      } finally {
+        isRunning = false;
+      }
+    }
   );
 }
 
