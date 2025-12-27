@@ -48,14 +48,14 @@ export function createRefineSelectionCommand(vscodeApi: typeof vscode, state: Ex
     }
 
     try {
-      ui.showInfo(vscodeApi, '🔄 Refining...');
-
       // Copy to clipboard for the task
       await ui.writeClipboard(vscodeApi, selectedText);
       await sleep(CLIPBOARD_DELAY_MS);
 
-      // Run the refine task
-      const result = await runTaskByName(vscodeApi, TASK_NAME, TASK_TIMEOUT_MS);
+      // Run the refine task with spinner
+      const result = await ui.withSpinner(vscodeApi, '🔄 Refining...', async () => {
+        return runTaskByName(vscodeApi, TASK_NAME, TASK_TIMEOUT_MS);
+      });
 
       if (!result.success) {
         ui.showError(vscodeApi, result.error ?? 'Task failed');
