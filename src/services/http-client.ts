@@ -29,7 +29,20 @@ async function httpPost(
   options: HttpClientOptions
 ): Promise<{ status: number; body: string }> {
   const controller = new AbortController();
+
+  // If an external signal was provided, forward its abort to our controller
+  if (options.signal) {
+    if (options.signal.aborted) {
+      controller.abort();
+    } else {
+      options.signal.addEventListener('abort', () => controller.abort(), { once: true });
+    }
+  }
+
   const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs);
+
+  // Debug info to help diagnose timeouts
+  console.debug('[httpPost] POST', url, 'timeoutMs=', options.timeoutMs);
 
   try {
     // Dynamic import for node-fetch (ESM compatibility)
@@ -39,7 +52,9 @@ async function httpPost(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-      agent: () => httpAgent,
+      // node-fetch accepts an agent or a function returning an agent.
+      // Provide the httpAgent directly for simplicity.
+      agent: httpAgent,
       signal: controller.signal,
     });
 
