@@ -10,7 +10,9 @@ import type { RefinerConfig, DaemonConfig, CliConfig } from '../types/index.js';
 
 const DEFAULTS = {
   WEBHOOK_URL: 'http://localhost:5678/webhook/refine-prompt',
-  TIMEOUT_MS: 15000,
+  TIMEOUT_MS: 60000,
+  // Increased default webhook timeout to 60s to accommodate slower webhook handlers
+  // (Previously 15s)
   MAX_RETRIES: 3,
   BASE_DELAY_MS: 500,
   SOCKET_PATH: '/tmp/prompt-refiner.sock',
