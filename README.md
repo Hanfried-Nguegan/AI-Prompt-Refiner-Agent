@@ -1,8 +1,7 @@
 # Prompt Refiner
 
-A modular, production-ready prompt refinement tool that connects your editor, terminal, and IDE to an n8n automation workflow. Built with TypeScript, designed for speed and flexibility.
+A modular, context-ready prompt refinement tool that connects your editor, terminal, and IDE to an n8n automation workflow. Built with TypeScript, designed for speed and flexibility.
 
-[![CI](https://github.com/yourusername/prompt-refiner/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/prompt-refiner/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.0+-black.svg)](https://bun.sh/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
