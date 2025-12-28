@@ -2,8 +2,6 @@
  * HTTP client for webhook communication
  */
 
-import http from 'http';
-import https from 'https';
 import type { WebhookResponse, RefinerConfig } from '../types/index.js';
 import { RefinerError, RefineErrorCode } from '../types/index.js';
 import {
@@ -12,19 +10,6 @@ import {
   calculateBackoffDelay,
   sleep,
 } from '../utils/index.js';
-
-// Reusable HTTP/HTTPS agents with explicit long timeouts to avoid premature socket closure
-const httpAgent = new http.Agent({
-  keepAlive: true,
-  keepAliveMsecs: 30000,
-  timeout: 0, // Disable agent timeout completely
-});
-
-const httpsAgent = new https.Agent({
-  keepAlive: true,
-  keepAliveMsecs: 30000,
-  timeout: 0, // Disable agent timeout completely
-});
 
 export interface HttpClientOptions {
   timeoutMs: number;
@@ -51,23 +36,23 @@ async function httpPost(
     }
   }
 
-  const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs);
+  const timeoutId = setTimeout(() => {
+    console.error(`[httpPost] Aborting request after ${options.timeoutMs}ms timeout`);
+    controller.abort();
+  }, options.timeoutMs);
 
   // Debug info to help diagnose timeouts
-  console.debug('[httpPost] POST', url, 'timeoutMs=', options.timeoutMs);
+  console.log('[httpPost] POST', url, 'timeoutMs=', options.timeoutMs);
 
   try {
-    // Dynamic import for node-fetch (ESM compatibility)
-    const { default: fetch } = await import('node-fetch');
-
     const fetchStartTime = Date.now();
-    // Use https agent for https URLs, http agent for http URLs
-    const agent = url.startsWith('https') ? httpsAgent : httpAgent;
+    
+    // Use native fetch (available in Node 18+ and VS Code extension host)
+    // This is more reliable than node-fetch in VS Code extension context
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-      agent,
       signal: controller.signal,
     });
 

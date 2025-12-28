@@ -167,7 +167,7 @@ If you're hitting limits frequently, try these approaches:
 **Increase timeout and retries** (give n8n more time to recover):
 
 ```bash
-REFINER_TIMEOUT_MS=25000 REFINER_MAX_RETRIES=5 bun run cli
+REFINER_TIMEOUT_MS=300000 REFINER_MAX_RETRIES=5 bun run cli
 ```
 
 **Use the daemon** (cached results skip API calls entirely):
