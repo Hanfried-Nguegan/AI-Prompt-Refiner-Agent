@@ -46,7 +46,7 @@ async function httpPost(
 
   try {
     const fetchStartTime = Date.now();
-    
+
     // Use native fetch (available in Node 18+ and VS Code extension host)
     // This is more reliable than node-fetch in VS Code extension context
     const response = await fetch(url, {
