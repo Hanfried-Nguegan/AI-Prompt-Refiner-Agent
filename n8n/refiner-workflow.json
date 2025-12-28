@@ -1,67 +1,164 @@
 {
-  "name": "Prompt Refiner - API Key Rotation",
+  "name": "Prompt Refiner",
   "nodes": [
     {
       "parameters": {
-        "functionCode": "const keys = (process.env.OPENAI_KEYS || '').split(',').map(k=>k.trim()).filter(Boolean);\nif(!keys.length) throw new Error('No OPENAI_KEYS');\nconst meta = this.getWorkflowStaticData('global');\nmeta.rotateIndex = (meta.rotateIndex || 0) % keys.length;\nconst key = keys[meta.rotateIndex];\nmeta.rotateIndex = (meta.rotateIndex + 1) % keys.length;\nreturn [{ json: { OPENAI_KEY: key } }];"
+        "httpMethod": "POST",
+        "path": "refine-prompt",
+        "responseMode": "responseNode",
+        "options": {}
       },
-      "name": "RotateKey",
-      "type": "n8n-nodes-base.function",
-      "typeVersion": 1,
-      "position": [250, 300]
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-576, -160],
+      "id": "webhook-node",
+      "name": "Webhook",
+      "webhookId": "refine-prompt-webhook"
     },
     {
       "parameters": {
-        "requestMethod": "POST",
-        "url": "={{$json[\"webhookUrl\"] || 'https://api.openai.com/v1/chat/completions'}}",
-        "options": {},
-        "headers": [
-          {
-            "name": "Authorization",
-            "value": "Bearer {{$json.OPENAI_KEY}}"
-          },
-          {
-            "name": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "bodyParametersJson": "={ \"model\": \"gpt-4o-mini\", \"messages\": [{\"role\": \"user\", \"content\": $json.prompt }], \"max_tokens\": 200 }"
+        "options": {}
       },
-      "name": "CallModel",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
-      "position": [450, 300]
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [352, -160],
+      "id": "respond-webhook-node",
+      "name": "Respond to Webhook",
+      "notesInFlow": false,
+      "alwaysOutputData": false
     },
     {
-      "parameters": {},
-      "name": "Respond",
-      "type": "n8n-nodes-base.respondToWebhook",
+      "parameters": {
+        "model": "deepseek/deepseek-r1-0528:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
-      "position": [650, 300]
+      "position": [-288, 64],
+      "id": "openrouter-classifier-model",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$node[\"Webhook\"].json[\"body\"][\"prompt\"]}}\n",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a prompt classification engine.  Analyze the user's prompt and return STRICT JSON with: - intent: one of [coding, design, debugging, explanation, brainstorming] - domain: one of [frontend, backend, devops, uiux, data, general] - missing_context: array of missing but important details - ambiguities: array of unclear or vague parts  Rules: - Return JSON only - No markdown - No explanations"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [-352, -160],
+      "id": "classifier-node",
+      "name": "Classifier"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$node[\"Classifier\"].json[\"text\"]}}\n",
+        "options": {
+          "systemMessage": "You are a prompt refinement engine.\n\nRewrite the user's original prompt into a clear, complete, and high-quality prompt for an LLM.\n\nRules:\n- Keep the original intent\n- Make reasonable assumptions to fill in missing context (don't ask questions)\n- Resolve ambiguities with sensible defaults\n- Do NOT ask clarifying questions\n- Do NOT list options or alternatives\n- Output ONLY the improved prompt as plain text\n- No markdown, no bullet points, no explanations"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [0, -160],
+      "id": "refiner-node",
+      "name": "Refiner"
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1-0528:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [80, 64],
+      "id": "openrouter-refiner-model",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "",
+          "name": "OpenRouter account"
+        }
+      }
     }
   ],
+  "pinData": {},
   "connections": {
-    "RotateKey": {
+    "Webhook": {
       "main": [
         [
           {
-            "node": "CallModel",
+            "node": "Classifier",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "CallModel": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classifier": {
       "main": [
         [
           {
-            "node": "Respond",
+            "node": "Refiner",
             "type": "main",
             "index": 0
           }
         ]
       ]
+    },
+    "Refiner": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Refiner",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
-  }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
 }
