@@ -69,6 +69,7 @@ After installation, the `prompt-refiner` command works from any directory:
 
 **Terminal (CLI):**
 
+
 ```bash
 echo "write me a prompt about typescript" | prompt-refiner
 # Result copied to clipboard automatically
